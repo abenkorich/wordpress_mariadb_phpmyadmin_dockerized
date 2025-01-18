@@ -1,0 +1,95 @@
+# Docker Compose version
+# https://docs.docker.com/compose/compose-file/compose-file-v3/
+version: '3'
+
+# Start of services
+services:
+
+  # Define the 'wordpress' service.
+  wordpress:
+    # Use the official WordPress Docker image.
+    image: wordpress
+    # Expose port 8080 for communication within the network.
+    expose:
+      - 8080    
+    ports:
+      # Map host port 8080 to container port 80 for external access.
+      - 8080:80    
+    networks:
+      # Connect to the 'internal' network for communication.
+      - internal  
+    # Set environment variables for the WordPress service.
+    environment:
+      # Set the db host 
+      WORDPRESS_DB_HOST: mariadb
+      # Set the db name
+      WORDPRESS_DB_NAME: wp_db_001
+      # Set db user and password
+      WORDPRESS_DB_USER: wp_db_user
+      WORDPRESS_DB_PASSWORD: Pass!@#Word # change this!          
+    volumes:
+      # Mount a local directory as a volume in the container.
+      - ./wordpress:/var/www/html
+
+  # Define the MariaDB service.
+  mariadb:
+    # Use the official MariaDB Docker image.
+    image: mariadb    
+    expose:
+      # Expose port 3306 for communication within the network.
+      - 3306    
+    ports:
+      # Map host port 3306 to container port 3306 for external access.
+      - 3306:3306    
+    networks:
+      # Connect to the 'internal' network for communication.
+      - internal
+    # Set environment variables for the MariaDB service.
+    environment:
+      # Create Wordpress database
+      MYSQL_DATABASE: wp_db_001
+      # Create Wordpress user + password
+      MYSQL_USER: wp_db_user
+      MYSQL_PASSWORD: Pass!@#Word # Change this!
+      # Set the db root password
+      MYSQL_ROOT_PASSWORD: Pass!@#Word # Change this!
+      # Set MARIADB_MYSQL_LOCALHOST_USER to a non-empty value to create the mysql@locahost database user. 
+      # This user is especially useful for a variety of health checks and backup scripts.
+      # https://hub.docker.com/_/mariadb
+      # MARIADB_MYSQL_LOCALHOST_USER: true    
+    volumes:
+      # Mount a local directory as a volume in the container.
+      - ./db:/var/lib/mysql
+
+  # Define the 'pma' service for phpMyAdmin.
+  pma: 
+    # Use the official phpMyAdmin Docker image.
+    image: phpmyadmin
+    # Ensure the container restarts automatically if it stops.
+    restart: always
+    # Expose port 8181 for communication within the network.
+    expose:
+      - 8181
+    # Map host port 8181 to container port 80 for external access.
+    ports:
+      - 8181:80 
+    # Connect to the 'internal' network for communication.
+    networks:
+      - internal 
+    # Set environment variables for the phpMyAdmin service.
+    environment:
+      # Disable arbitrary server connection; use the configured host and port
+      - PMA_ARBITRARY=0 
+      # Set the host for phpMyAdmin to connect to
+      - PMA_HOST=mariadb
+      # Set the port for phpMyAdmin to connect to
+      - PMA_PORT=3306
+
+# Define the 'internal' network for inter-container communication.
+networks:
+  internal:
+
+# Define named volumes for data storage.
+volumes:
+  wordpress:
+  db:
