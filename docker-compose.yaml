@@ -30,7 +30,15 @@ services:
     volumes:
       # Mount a local directory as a volume in the container.
       - ./wordpress:/var/www/html
-
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - '-f'
+        - 'http://127.0.0.1'
+      interval: 2s
+      timeout: 10s
+      retries: 10
   # Define the MariaDB service.
   mariadb:
     # Use the official MariaDB Docker image.
@@ -60,7 +68,15 @@ services:
     volumes:
       # Mount a local directory as a volume in the container.
       - ./db:/var/lib/mysql
-
+    healthcheck:
+      test:
+        - CMD
+        - 'wget -O - https://raw.githubusercontent.com/MariaDB/mariadb-docker/refs/heads/master/healthcheck.sh | bash'
+        - '--connect'
+        - '--innodb_initialized'
+      interval: 5s
+      timeout: 20s
+      retries: 10
   # Define the 'pma' service for phpMyAdmin.
   pma: 
     # Use the official phpMyAdmin Docker image.
@@ -84,7 +100,16 @@ services:
       - PMA_HOST=mariadb
       # Set the port for phpMyAdmin to connect to
       - PMA_PORT=3306
-
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - '-f'
+        - 'http://127.0.0.1:80'
+      interval: 2s
+      timeout: 10s
+      retries: 15
+      
 # Define the 'internal' network for inter-container communication.
 networks:
   internal:
