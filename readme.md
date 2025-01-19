@@ -22,3 +22,7 @@ Please ensure that the following ports are not used by another instance on your 
 ## Security
 
 For security concerns, replace any hardcoded passwords in the Docker file with environment variables or your own password on the production server.
+
+## Sources:
+
+The mariadb healthcheck script is the one used in thier offcial docker image: https://github.com/MariaDB/mariadb-docker/tree/master
